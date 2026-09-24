@@ -17,7 +17,7 @@
 #define IN_D1     5
 #define IN_DE_RE  6
 #define IN_BAUDRATE   9600
-#define IN_ID     11 //0x0B
+#define IN_ID     11
 
 int i = 0;
 bool data_ready = false;
