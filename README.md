@@ -13,4 +13,4 @@ Very helpful for understanding DTSU666-H Modbus registers(_https://github.com/si
 * Stop replying when communication fails with DDS238 to stop reply old data
 * Convert all 32-bit and 16-bit unsigned data to 32-bit float
 
-_I have used a dedicated power supply, some indicator LEDs, and a box for outdoor use. Use only with a single-phase Huawei inverter; not recommended for export limitation. _
+_I have used a dedicated power supply, some indicator LEDs, and a box for outdoor use. Use only with a single-phase Huawei inverter; **not recommended for export limitation.**_
