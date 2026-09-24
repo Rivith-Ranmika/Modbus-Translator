@@ -180,7 +180,7 @@ ModbusMessage handleReadHolding(ModbusMessage request){
     }
   }
   else{
-    //try to send meter error for 0x07D1 address
+    //send meter error register
     Serial.println("Data not ready");
     response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
     return response;
