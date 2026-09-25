@@ -17,7 +17,7 @@
 #define IN_D1     5
 #define IN_DE_RE  6
 #define IN_BAUDRATE   9600
-#define IN_ID     11
+#define IN_ID     11 //0x0B
 
 int i = 0;
 bool data_ready = false;
@@ -30,7 +30,7 @@ uint16_t registermap[3][3] = {
 };
 
 // 0-TOTAL 1-EXPORT  2-IMPORT 3-VOLTAGE 4-CURRENT 5-APOWER 6-RPOWER 7-PFACTOR 8-FREQUENCY 9-empty
-float Meter_RegData[10];  // to store Meter registers
+float Meter_RegData[10]={0};  // to store Meter registers
 int Divider[9]={
   100, //total
   100, //export
@@ -142,6 +142,12 @@ void handleData(ModbusMessage response, uint32_t token){
   }
   Serial.println();
   Serial.println("===========================");
+  Serial.printf(
+        "Free heap: %u | Min free: %u | Largest block: %u\n",
+        ESP.getFreeHeap(),
+        ESP.getMinFreeHeap(),
+        ESP.getMaxAllocHeap()
+    );
 }
 
 //For sent data
@@ -158,11 +164,11 @@ ModbusMessage handleReadHolding(ModbusMessage request){
     // Create Modbus response
     response.add(request.getServerID(), request.getFunctionCode(), (uint8_t)(words * 2));
 
-    if ((address == 0x07D1)&& (words==0x01)){//  meter status
+    if ((address == 0x07D1)&& (words == 0x01)){//  meter status
       response.add(uint16_t(0x3B11)); 
       return response;
     }
-    else if((address==0x0836)&& (words=0x50)) { //  first request
+    else if((address==0x0836)&& (words==0x50)) { //  first request
       for (uint16_t i = 0; i < words/2; i++) {
         response.add(Meter_RegData[HuaweiTranslate[i]]);  // translate meter adresses on to Huawei addresses
       }
@@ -171,6 +177,7 @@ ModbusMessage handleReadHolding(ModbusMessage request){
     else if ((address == 0x08A6)&& (words==0x0A)) {   //  read meter status data
       for (uint16_t i = 0; i <  words/2; i++) {
         response.add(0x0000);  // all registers set to zero
+        return response;
       }
     }
     else{ //Set up error response
@@ -180,7 +187,7 @@ ModbusMessage handleReadHolding(ModbusMessage request){
     }
   }
   else{
-    //send meter error register
+    //try to send meter error for 0x07D1 address
     Serial.println("Data not ready");
     response.setError(request.getServerID(), request.getFunctionCode(), SERVER_DEVICE_FAILURE);
     return response;
@@ -216,7 +223,7 @@ unsigned long previousMillis = 0;
 //cyclically request the data from Meter
 void loop() {
   static uint32_t token = 1;
-  Meter_RegData[9] = 0/10;
+  //Serial.printf("Free heap: %u\n", ESP.getFreeHeap());
 
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= 400) {
